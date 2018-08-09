@@ -1,0 +1,72 @@
+---
+title: "Exploring NFL Play-by-Play Data"
+author: "Seth Goldman"
+date: "August 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(skimr)
+
+pbp_2017 <- readRDS("pbp_2017")
+
+```
+
+```{r glimpse, echo = FALSE}
+glimpse(pbp_2017)
+
+```
+
+```{r summary, echo = FALSE}
+pbp_2017 %>% skim()
+```
+
+```{r variable_eda,echo = TRUE}
+pbp_2017 %>% count(Passer) %>% arrange(desc(n))
+
+pbp_2017 %>% count(Rusher)  %>% arrange(desc(n))
+
+pbp_2017 %>% count(Receiver)  %>% arrange(desc(n))
+
+pbp_2017 %>% count(Returner) %>% arrange(desc(n))
+
+pbp_2017 %>% count(PlayType) %>% arrange(desc(n))
+
+pbp_2017 %>% count(PassOutcome) %>% arrange(desc(n))
+
+pbp_2017 %>% count(PuntResult)
+
+pbp_2017 %>% count(PenalizedPlayer,PenalizedTeam) %>% arrange(desc(n))
+
+pbp_2017 %>% count(Tackler1) %>% arrange(desc(n))
+
+pbp_2017 %>% count(Tackler2) %>% arrange(desc(n))
+
+pbp_2017 %>% filter(!is.na(Tackler2)) %>%  count(Tackler1,Tackler2) %>% arrange(desc(n))
+
+pbp_2017 %>% count(RunLocation) %>% arrange(desc(n))
+
+pbp_2017 %>% count(RunGap) %>% arrange(desc(n))
+
+pbp_2017 %>% count(PassLocation) %>% arrange(desc(n))
+
+
+```
+
+### Explore EPA
+
+```{r EPA, echo = TRUE}
+
+pbp_2017 %>% arrange(desc(EPA)) %>% 
+  select(Date,Passer,Receiver,Rusher,desc, EPA)
+
+pbp_2017 %>% 
+  group_by(Passer) %>% 
+  summarise("total_epa" = sum(EPA)) %>% 
+  arrange(desc(total_epa))
+
+```
+
+
