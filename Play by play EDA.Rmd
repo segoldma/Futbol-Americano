@@ -67,6 +67,12 @@ pbp_2017 %>%
   summarise("total_epa" = sum(EPA)) %>% 
   arrange(desc(total_epa))
 
+
+pbp_2017 %>% 
+  filter(QBHit == 1) %>% 
+  arrange(desc(EPA)) %>% 
+  select(desc)
+
 ```
 
 
