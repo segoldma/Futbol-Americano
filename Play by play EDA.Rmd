@@ -1,7 +1,6 @@
 ---
 title: "Exploring NFL Play-by-Play Data"
 author: "Seth Goldman"
-date: "August 8, 2018"
 output: html_document
 ---
 
@@ -9,6 +8,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(skimr)
+library(ggplot2)
+library(lubridate)
 
 pbp_2017 <- readRDS("pbp_2017")
 
@@ -21,6 +22,8 @@ glimpse(pbp_2017)
 
 ```{r summary, echo = FALSE}
 pbp_2017 %>% skim()
+
+pbp_skim <- pbp_2017 %>% skim()
 ```
 
 ```{r variable_eda,echo = TRUE}
@@ -72,6 +75,33 @@ pbp_2017 %>%
   filter(QBHit == 1) %>% 
   arrange(desc(EPA)) %>% 
   select(desc)
+
+```
+
+
+### Explore Play Type
+
+```{r playtype, echo = TRUE}
+
+pbp_2017 %>% 
+  count(PlayType) %>% 
+  ggplot(aes(x=PlayType, y = n)) +
+  geom_point()+
+  coord_flip() 
+
+
+pbp_2017 %>% 
+  filter(!PlayType %in% c("Timeout","Two Minute Warning", "Quarter End", "Half End", "End of Game")) %>% 
+  count(posteam,PlayType) %>% 
+  arrange(desc(n)) %>% 
+  ggplot(aes(x=reorder(PlayType, n), y = n,col=PlayType)) +
+  geom_point() +
+  coord_flip()+
+  facet_wrap(~posteam) +
+  xlab("Play Type") +
+  ylab("Plays")
+
+
 
 ```
 
