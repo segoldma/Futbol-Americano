@@ -106,3 +106,43 @@ pbp_2017 %>%
 ```
 
 
+```{r recept_rush, echp = TRUE}
+
+# Explore Reception
+pbp_2017 %>% 
+  filter(PlayType %in% c("Pass","Run")) %>% 
+  group_by(PlayType,Reception) %>% 
+  tally()
+# Explore RushAttempt
+pbp_2017 %>% 
+  filter(PlayType %in% c("Pass","Run")) %>% 
+  group_by(PlayType,RushAttempt) %>% 
+  tally()
+```
+
+```{r fourth_downs}
+
+pbp_2017 %>% 
+  filter(down == 4 & qtr < 5) %>% 
+  ggplot(aes(x=qtr))+
+  geom_bar(aes(fill=PlayType))
+
+
+
+```
+
+
+```{r drive_zoom_in}
+pbp_2017 %>% 
+  filter(GameID == GameID[[1]] & Drive == Drive[[1]]) %>% 
+  select(time,TimeSecs,qtr,down,ydstogo,yrdln,yrdline100,ydsnet,posteam,DefensiveTeam,PlayType,Yards.Gained,AirYards,YardsAfterCatch,desc) %>% View()
+```
+
+```{r no_play}
+# Explore Type of No Plays that are non-PassAttempts -- potentially penalties?
+pbp_2017 %>% 
+  filter(PlayType == "No Play" & PassAttempt == 0) %>% 
+  select(starts_with("Pen"),desc) %>% View()
+
+```
+
