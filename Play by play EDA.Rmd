@@ -135,14 +135,52 @@ pbp_2017 %>%
 ```{r drive_zoom_in}
 pbp_2017 %>% 
   filter(GameID == GameID[[1]] & Drive == Drive[[1]]) %>% 
-  select(time,TimeSecs,qtr,down,ydstogo,yrdln,yrdline100,ydsnet,posteam,DefensiveTeam,PlayType,Yards.Gained,AirYards,YardsAfterCatch,desc) %>% View()
+  select(time,TimeSecs,qtr,down,ydstogo,yrdln,yrdline100,ydsnet,posteam,DefensiveTeam,PlayType,Yards.Gained,AirYards,YardsAfterCatch,desc) 
 ```
 
 ```{r no_play}
-# Explore Type of No Plays that are non-PassAttempts -- potentially penalties?
+# Explore Type of No Plays that are non-PassAttempts -- potentially penalties? (Confirmed)
 pbp_2017 %>% 
-  filter(PlayType == "No Play" & PassAttempt == 0) %>% 
-  select(starts_with("Pen"),desc) %>% View()
+  mutate("isPenalty" = case_when(grepl("Penalty", desc) ~ 1,
+                                 grepl("PENALTY", desc) ~ 1,
+                                 TRUE ~ 0)) %>%
+  filter(PlayType == "No Play" & isPenalty == 0) %>% 
+  select(PlayType,contains("Pen"),desc)
+
+
+```
+
+
+```{r receivers_analysis, echo=FALSE}
+pbp_2017 %>% 
+  filter(!is.na(Receiver)) %>% 
+  group_by(Receiver,Receiver_ID) %>% 
+  summarise("Receptions" = n(),
+            "YardsGained" = sum(Yards.Gained),
+            "YardsAfterCatch" = sum(YardsAfterCatch),
+            "YPR" = YardsGained/Receptions,
+            "YACPR" = YardsAfterCatch/Receptions) %>% 
+  arrange(desc(YACPR)) 
+
+pbp_2017 %>% 
+  filter(!is.na(Receiver) & !is.na(down)) %>% 
+  ggplot(aes(x=Yards.Gained)) +
+  geom_density()+
+  facet_wrap(ydstogo~down)
+
+pbp_2017 %>% 
+  filter(!is.na(Receiver) & !is.na(down)) %>% 
+  mutate("yards_to_go_segment" = case_when(ydstogo == 0 ~ "0",
+                                  ydstogo >= 1 & ydstogo < 4 ~ "short",
+                                  ydstogo >= 4 & ydstogo < 8 ~ "short-medium",
+                                  ydstogo >= 8 & ydstogo < 10 ~ "medium-long",
+                                  ydstogo >= 10 ~ "long")) %>% 
+  ggplot(aes(x=Yards.Gained)) +
+  geom_density()+
+  facet_grid(yards_to_go_segment~down) +
+  ggtitle("Pass Yards Gained by Distance-to-go and Down",
+          subtitle = "To-go could be a first down or a TD")
+
 
 ```
 
