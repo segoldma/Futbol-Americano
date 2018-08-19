@@ -184,3 +184,49 @@ pbp_2017 %>%
 
 ```
 
+```{r model_player_attempts}
+pass_attempts_total_epa <- pbp_2017 %>% 
+  filter(PassAttempt == 1) %>% 
+  group_by(Passer,Passer_ID) %>% 
+  summarise("Att" = n(),
+            "Completions" = sum(PassOutcome=="Complete"),
+            "AvgEPA" = mean(EPA,na.rm=TRUE),
+            "TotalEPA" = sum(EPA,na.rm=TRUE)) %>% 
+  arrange(desc(Att))
+
+
+pass_attempts_air_epa <- pbp_2017 %>% 
+  filter(PassAttempt == 1) %>% 
+  group_by(Passer,Passer_ID) %>% 
+   summarise("Att" = n(),
+            "Completions" = sum(PassOutcome=="Complete"),
+            "AvgAirEPA" = mean(airEPA,na.rm=TRUE),
+            "TotalAirEPA" = sum(airEPA,na.rm=TRUE))
+
+            
+pass_attempts_yac_epa <- pbp_2017 %>% 
+  filter(PassAttempt == 1) %>% 
+  group_by(Passer,Passer_ID) %>% 
+   summarise("Att" = n(),
+            "Completions" = sum(PassOutcome=="Complete"),
+            "AvgYacEPA" = mean(yacEPA,na.rm=TRUE),
+            "TotalYacEPA" = sum(yacEPA,na.rm=TRUE)) %>% 
+  arrange(desc(Att))
+
+
+            
+pass_attempts_total_epa %>% 
+  filter(Att>100) %>% 
+  ggplot(aes(x=reorder(Passer,AvgEPA),y=AvgEPA))+
+  geom_point()+
+  coord_flip()
+
+pbp_2017 %>% 
+  filter(PassAttempt == 1, !is.na(Passer)) %>% 
+  ggplot(aes(Passer,EPA))+
+  geom_boxplot() +
+  coord_flip()
+  
+
+```
+
