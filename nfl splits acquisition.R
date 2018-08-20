@@ -560,7 +560,7 @@ saveRDS(games_2017, "./data/season_games/games_2017.rds")
 
 # Same thing for playoffs: (SG: coming back to this later)
 
-playoff_ids_09 <- extracting_gameids(2009, playoffs = TRUE)
+system.time(playoff_ids_09 <- extracting_gameids(2009, playoffs = TRUE))
 playoff_ids_10 <- extracting_gameids(2010, playoffs = TRUE)
 playoff_ids_11 <- extracting_gameids(2011, playoffs = TRUE)
 playoff_ids_12 <- extracting_gameids(2012, playoffs = TRUE)
@@ -692,13 +692,14 @@ saveRDS(playoff_team_game_rushing_df, "./data/playoff_game_team_stats/playoff_ga
 
 # Playoffs:
 
-playoff_passing_df <- calc_passing_splits(c("Season","Passer_ID"), playoff_pbp_data) %>% 
+playoff_passing_df <- calc_passing_splits(c("Season","Passer_ID", "posteam"), playoff_pbp_data) %>% 
   filter(Passer_ID != "None") %>% arrange(Season,desc(Attempts)) %>% rename(Team = posteam)
 
-playoff_receiving_df <- calc_receiving_splits(c("Season","Receiver_ID"), playoff_pbp_data) %>% 
+
+playoff_receiving_df <- calc_receiving_splits(c("Season","Receiver_ID", "posteam"), playoff_pbp_data) %>% 
   filter(Receiver_ID != "None") %>% arrange(Season,desc(Targets)) %>% rename(Team = posteam)
 
-playoff_rushing_df <- calc_rushing_splits(c("Season","Rusher_ID"), playoff_pbp_data) %>%
+playoff_rushing_df <- calc_rushing_splits(c("Season","Rusher_ID", "posteam"), playoff_pbp_data) %>%
   filter(Rusher_ID != "None") %>% arrange(Season,desc(Carries)) %>% rename(Team = posteam)
 
 saveRDS(playoff_passing_df, "./data/playoff_player_stats/season_passing_df.rds")
