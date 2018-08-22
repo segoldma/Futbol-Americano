@@ -14,6 +14,17 @@ game_results <- bind_rows(readRDS("./data/season_games/games_2009.rds"),
                           readRDS("./data/season_games/games_2016.rds"),
                           readRDS("./data/season_games/games_2017.rds"))
 
+# Update team names that have relocated
+game_results <- game_results %>% 
+  mutate(home = case_when(home == "JAX"~ "JAC",
+                        home == "SD" ~ "LAC",
+                        home == "STL" ~ "LA",
+                        TRUE ~ home),
+       away = case_when(away == "JAX"~ "JAC",
+                        away == "SD" ~ "LAC",
+                        away == "STL" ~ "LA",
+                        TRUE ~ away))
+
 # Absolute Margin of Victory by Year
 game_results %>% 
   group_by(Season) %>% 
@@ -52,4 +63,16 @@ game_results %>%
 game_results %>% 
   count(home) %>% 
   arrange(n)
+
+game_results %>% 
+  mutate(home = case_when(home == "JAX"~ "JAC",
+                          home == "SD" ~ "LAC",
+                          home == "STL" ~ "LA",
+                          TRUE ~ home),
+         away = case_when(away == "JAX"~ "JAC",
+                          away == "SD" ~ "LAC",
+                          away == "STL" ~ "LA",
+                          TRUE ~ away))
+
+odds = readLines("http://www.vegasinsider.com/nfl/odds/las-vegas/")
          
