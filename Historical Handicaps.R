@@ -69,7 +69,39 @@ odds_archives <- odds_archives %>%
                              month %in% c(4,5,6,7,8,9,10,11,12) ~ new_date)) 
 
 
+## Replace Pickem values (pk) with zeroes.
+odds_archives <- odds_archives %>% 
+  mutate("Open" = ifelse(Open == "pk","0",Open),
+         "Close" = ifelse(Close == "pk","0",Close))
+
+## Update numeric data types that are currently character vectors
+odds_archives <- odds_archives %>% 
+  mutate(Open = as.numeric(Open),
+         Close = as.numeric(Close),
+         ML = as.numeric(ML))
+
+
+## Add a game_id column
+odds_archives <- odds_archives %>% 
+  mutate("game_id" = paste0("G-",rep(seq(0,(nrow(odds_archives)/2-1)),each = 2))) 
+  
+
 ## Pare down the dataframe to include the core fields
 odds_summary <- odds_archives %>% 
-  select(Date,Team,Open,Close)
+  select(game_id,Date,Team,Open,Close,ML)
 
+# Create a wide format version of the dataset where each row is a single contest
+game_subset_one <- slice(odds_summary, seq(1, nrow(odds_summary), 2))
+game_subset_two <- slice(odds_summary, seq(2, nrow(odds_summary), 2))
+hist_results_wide <- left_join(game_subset_one, game_subset_two, by = c("game_id","Date"), suffix = c("1","2"))
+
+# Determine which team was favored
+hist_results_wide %>% 
+  mutate("Fav" = ifelse(ML1 > ML2, Team2, Team1),
+         "OpenSpread" = case_when(Team1 == Fav ~ Open1 * -1,
+                                  Team2 == Fav ~ Open2 * -1),
+         "CloseSpread" = case_when(Team1 == Fav ~ Close1 * -1,
+                                   Team2 == Fav ~ Close2 * -1)) %>% 
+  View()
+
+# Need to improve the logic for contests where the favorite changed between Open and Close
