@@ -2,6 +2,7 @@
 
 library(readxl)
 library(tidyverse)
+library(lubridate)
 
 ## Read in historical odds data
 
@@ -95,13 +96,45 @@ game_subset_one <- slice(odds_summary, seq(1, nrow(odds_summary), 2))
 game_subset_two <- slice(odds_summary, seq(2, nrow(odds_summary), 2))
 hist_results_wide <- left_join(game_subset_one, game_subset_two, by = c("game_id","Date"), suffix = c("1","2"))
 
-# Determine which team was favored
-hist_results_wide %>% 
-  mutate("Fav" = ifelse(ML1 > ML2, Team2, Team1),
-         "OpenSpread" = case_when(Team1 == Fav ~ Open1 * -1,
-                                  Team2 == Fav ~ Open2 * -1),
-         "CloseSpread" = case_when(Team1 == Fav ~ Close1 * -1,
-                                   Team2 == Fav ~ Close2 * -1)) %>% 
-  View()
+rm(list=c("game_subset_one","game_subset_two"))
 
-# Need to improve the logic for contests where the favorite changed between Open and Close
+# Determine which team was favored
+hist_results_wide <- hist_results_wide %>% 
+  mutate("OpenFav" = case_when(Open1 < Open2 ~ Team1,
+                                  Open1 > Open2 ~ Team2),
+         "OpenSpread" = case_when(Team1 == OpenFav ~ Open1 * -1,
+                                  Team2 == OpenFav ~ Open2 * -1),
+         "CloseFav" = case_when(Close1 < Close2 ~ Team1,
+                                Close1 > Close2 ~ Team2),
+         "CloseSpread" = case_when(Team1 == CloseFav ~ Close1 * -1,
+                                   Team2 == CloseFav ~ Close2 * -1),
+         "Team1Open" = case_when(Team1 == OpenFav ~ OpenSpread,
+                               !Team1 == OpenFav ~ OpenSpread * -1),
+         "Team1Close" = case_when(Team1 == CloseFav ~ CloseSpread,
+                                !Team1 == CloseFav ~ CloseSpread *-1),
+         "Team2Open" = case_when(Team2 == OpenFav ~ OpenSpread,
+                               !Team2 == OpenFav ~ OpenSpread * -1),
+         "Team2Close" = case_when(Team2 == CloseFav ~ CloseSpread,
+                                !Team2 == CloseFav ~ CloseSpread *-1)) %>% 
+  select(game_id, Date, Team1, Team1Open, Team1Close, Team2, Team2Open, Team2Close) 
+
+# Reshape the dataframe where each row is a single team-game with opening and closing handicaps
+spread_subset_one <- hist_results_wide %>% 
+  select(game_id,Date,"Team"=Team1,"Open" = Team1Open, "Close" = Team1Close)
+
+spread_subset_two <- hist_results_wide %>% 
+  select(game_id,Date,"Team"=Team2,"Open" = Team2Open, "Close" = Team2Close)
+
+# Bind the two subsets 
+spreads <- bind_rows(spread_subset_one,spread_subset_two)
+
+# Clean up the workspace
+rm(
+  list = c(
+    "hist_results_wide",
+    "odds_archives",
+    "odds_summary",
+    "spread_subset_one",
+    "spread_subset_two"
+  )
+)
