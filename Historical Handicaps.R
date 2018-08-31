@@ -138,3 +138,6 @@ rm(
     "spread_subset_two"
   )
 )
+
+# Save data to repo
+saveRDS(spreads,"./data/odds_archives/spreads.rds")
