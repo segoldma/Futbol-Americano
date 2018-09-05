@@ -96,7 +96,7 @@ game_subset_one <- slice(odds_summary, seq(1, nrow(odds_summary), 2))
 game_subset_two <- slice(odds_summary, seq(2, nrow(odds_summary), 2))
 hist_results_wide <- left_join(game_subset_one, game_subset_two, by = c("game_id","Date"), suffix = c("1","2"))
 
-rm(list=c("game_subset_one","game_subset_two"))
+rm(list=c("game_subset_one","game_subset_two","odds_archives"))
 
 # Determine which team was favored
 hist_results_wide <- hist_results_wide %>% 
